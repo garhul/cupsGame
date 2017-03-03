@@ -1,0 +1,17 @@
+{
+  "name": "cups-game",
+  "version": "1.0.0",
+  "description": "just a sample game",
+  "main": "app/main.js",
+  "scripts": {
+    "test": "mocha tests/*.js"
+  },
+  "keywords": [
+    "game"
+  ],
+  "author": "Adrian Gesto",
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^2.2.1"
+  }
+}
