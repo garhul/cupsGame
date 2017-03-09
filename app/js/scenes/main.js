@@ -168,7 +168,7 @@ module.exports = function mainScene(Game) {
         }
 
         scoreText.text = 'Score: ' + score;
-        maxScoreText.text = 'Max score: ' + score;
+        maxScoreText.text = 'Max score: ' + maxScore;
     }
 
     return {

@@ -1,7 +1,5 @@
 'use strict';
 
-
-/* Asset location constants */
 module.exports = {
     assets:{
         "path": "assets/",
@@ -12,8 +10,6 @@ module.exports = {
             {"id": "bg", "src":"bg.png"}
         ]
     },
-    balls_count: 1,
-    cups_count: 3,
     canvas: {
         width:'860px',
         height: '300px'

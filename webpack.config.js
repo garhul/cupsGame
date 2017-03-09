@@ -14,15 +14,13 @@ module.exports = {
     entry: './app/main.js',
 
     module: {
-        loaders: [
-            {
-                test: /\.scss$/,
-                loader: ExtractTextPlugin.extract({
-                fallbackLoader: "sass-loader",
-                loader: "css-loader!sass-loader",
-          })
-            }
-        ]
+        loaders: [{
+                    test: /\.scss$/,
+                    loader: ExtractTextPlugin.extract({
+                        fallbackLoader: "sass-loader",
+                        loader: "css-loader!sass-loader",
+                    })
+                }]
     },
     externals: {
         "createjs":"createjs"
