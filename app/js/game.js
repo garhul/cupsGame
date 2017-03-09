@@ -6,7 +6,6 @@ const Game = {
     scenes:{ menu:'menu.js', score:'scores.js', main:'main.js' },
     balls: [],
     cups : [],
-    currentScene : 0,
     stage:null,
     queue:null,
 
@@ -25,8 +24,7 @@ const Game = {
     renderScene: function(scene) {
         //clear our stage first
         this.stage.removeAllChildren();
-        var sc = require('./scenes/' + scene)(this)
-
+        var sc = require('./scenes/' + scene)(this);
         sc.render();
     }
 

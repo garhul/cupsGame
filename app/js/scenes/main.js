@@ -10,22 +10,22 @@ module.exports = function mainScene(Game) {
     var canPick = false;
     var liftedCup = null;
     var chooseTxt = null;
-    var scoreText = null;
-    var maxScoreText = null;
+    var scoreTxt = null;
+    var maxScoreTxt = null;
 
     function render() {
         //set background
         Game.stage.addChild(new createjs.Bitmap(Game.queue.getResult('bg')));
 
         //set score text
-        scoreText = new createjs.Text('Score: ' + maxScore, '.8em Arial', '#FFF');
-        scoreText.x = 5;
-        scoreText.y = 10;
+        scoreTxt = new createjs.Text('Score: ' + maxScore, '.8em Arial', '#FFF');
+        scoreTxt.x = 5;
+        scoreTxt.y = 10;
 
         //set max score text
-        maxScoreText = new createjs.Text('Max score: ' + maxScore, '.8em Arial', '#FFF');
-        maxScoreText.x = 5;
-        maxScoreText.y = 30;
+        maxScoreTxt = new createjs.Text('Max score: ' + maxScore, '.8em Arial', '#FFF');
+        maxScoreTxt.x = 5;
+        maxScoreTxt.y = 30;
 
         //set "choose a cup" text
         chooseTxt = new createjs.Text('Choose a cup', '1.4em Arial', '#FFF');
@@ -33,9 +33,10 @@ module.exports = function mainScene(Game) {
         chooseTxt.y = 50;
         chooseTxt.visible = false;
 
-        Game.stage.addChild(scoreText, maxScoreText, chooseTxt);
+        Game.stage.addChild(scoreTxt, maxScoreTxt, chooseTxt);
 
         createjs.MotionGuidePlugin.install();
+
         //let's draw the cups
         for (let i = 0; i < 3; i++) {
 
@@ -90,7 +91,7 @@ module.exports = function mainScene(Game) {
         goBtn.visible = false;
         //we start a new round
         var times = Math.floor(Math.random() * 3) + 3;
-        shuffle(times)
+        shuffle(times);
     }
 
     function shuffle(times) {
@@ -128,11 +129,12 @@ module.exports = function mainScene(Game) {
 
       createjs.Tween.get(cups[b])
         .to({guide:
-          {path:[cups[b].x,cups[b].y, 100, cups[a].y - 100, cups[a].x,cups[a].y]}}, spd)
-          .call(handler);
+            {path:[cups[b].x, cups[b].y, 100, cups[a].y - 100, cups[a].x,cups[a].y]}}, spd)
+            .call(handler);
     }
 
     function liftCup(index) {
+        canPick = false;
 
         liftedCup.x = cups[index].x
         cups[index].visible = false;
@@ -162,8 +164,8 @@ module.exports = function mainScene(Game) {
             }, 2500);
         }
 
-        scoreText.text = 'Score: ' + score;
-        maxScoreText.text = 'Max score: ' + maxScore;
+        scoreTxt.text = 'Score: ' + score;
+        maxScoreTxt.text = 'Max score: ' + maxScore;
     }
 
     return {

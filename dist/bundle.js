@@ -83,40 +83,40 @@ module.exports = function mainScene(Game) {
     var canPick = false;
     var liftedCup = null;
     var chooseTxt = null;
-    var scoreText = null;
-    var maxScoreText = null;
+    var scoreTxt = null;
+    var maxScoreTxt = null;
 
     function render() {
         //set background
         Game.stage.addChild(new createjs.Bitmap(Game.queue.getResult('bg')));
 
         //set score text
-        scoreText = new createjs.Text('Score: ' + maxScore, '.8em Arial', '#FFF');
-        scoreText.x = 5;
-        scoreText.y = 10;
+        scoreTxt = new createjs.Text('Score: ' + maxScore, '.8em Arial', '#FFF');
+        scoreTxt.x = 5;
+        scoreTxt.y = 10;
 
         //set max score text
-        maxScoreText = new createjs.Text('Max score: ' + maxScore, '.8em Arial', '#FFF');
-        maxScoreText.x = 5;
-        maxScoreText.y = 30;
+        maxScoreTxt = new createjs.Text('Max score: ' + maxScore, '.8em Arial', '#FFF');
+        maxScoreTxt.x = 5;
+        maxScoreTxt.y = 30;
 
+        //set "choose a cup" text
         chooseTxt = new createjs.Text('Choose a cup', '1.4em Arial', '#FFF');
         chooseTxt.x = Game.stage.canvas.width / 2 - chooseTxt.getMeasuredWidth();
         chooseTxt.y = 50;
         chooseTxt.visible = false;
 
-        Game.stage.addChild(scoreText, maxScoreText, chooseTxt);
+        Game.stage.addChild(scoreTxt, maxScoreTxt, chooseTxt);
 
-        //let's draw the cups
         createjs.MotionGuidePlugin.install();
 
+        //let's draw the cups
         for (let i = 0; i < 3; i++) {
 
             cups.push(new createjs.Bitmap(Game.queue.getResult('cup')));
 
             if (ballPosition === i)
             cups[i].visible = false;
-
             cups[i].x = (Game.stage.canvas.width / 3) * i + (Game.stage.canvas.width / (3 * 2)) - 5;
             cups[i].y = 120;
 
@@ -160,15 +160,11 @@ module.exports = function mainScene(Game) {
     function startRound() {
         ball.visible = false;
         liftedCup.visible = false;
-
-        cups.forEach((c)=>{
-            c.visible = true;
-        })
-
+        cups[ballPosition].visible = true;
         goBtn.visible = false;
         //we start a new round
         var times = Math.floor(Math.random() * 3) + 3;
-        shuffle(times)
+        shuffle(times);
     }
 
     function shuffle(times) {
@@ -206,11 +202,12 @@ module.exports = function mainScene(Game) {
 
       createjs.Tween.get(cups[b])
         .to({guide:
-          {path:[cups[b].x,cups[b].y, 100, cups[a].y - 100, cups[a].x,cups[a].y]}}, spd)
-          .call(handler);
+            {path:[cups[b].x, cups[b].y, 100, cups[a].y - 100, cups[a].x,cups[a].y]}}, spd)
+            .call(handler);
     }
 
     function liftCup(index) {
+        canPick = false;
 
         liftedCup.x = cups[index].x
         cups[index].visible = false;
@@ -240,8 +237,8 @@ module.exports = function mainScene(Game) {
             }, 2500);
         }
 
-        scoreText.text = 'Score: ' + score;
-        maxScoreText.text = 'Max score: ' + score;
+        scoreTxt.text = 'Score: ' + score;
+        maxScoreTxt.text = 'Max score: ' + maxScore;
     }
 
     return {
@@ -305,8 +302,6 @@ module.exports = function menuScene(Game) {
 "use strict";
 
 
-
-/* Asset location constants */
 module.exports = {
     assets:{
         "path": "assets/",
@@ -317,8 +312,6 @@ module.exports = {
             {"id": "bg", "src":"bg.png"}
         ]
     },
-    balls_count: 1,
-    cups_count: 3,
     canvas: {
         width:'860px',
         height: '300px'
@@ -339,7 +332,6 @@ const Game = {
     scenes:{ menu:'menu.js', score:'scores.js', main:'main.js' },
     balls: [],
     cups : [],
-    currentScene : 0,
     stage:null,
     queue:null,
 
@@ -358,8 +350,7 @@ const Game = {
     renderScene: function(scene) {
         //clear our stage first
         this.stage.removeAllChildren();
-        var sc = __webpack_require__(5)("./" + scene)(this)
-
+        var sc = __webpack_require__(5)("./" + scene)(this);
         sc.render();
     }
 
@@ -418,7 +409,7 @@ const style = __webpack_require__(4);
       canvas.setAttribute('width',cfg.canvas.width)
       canvas.setAttribute('height',cfg.canvas.height);
 
-      document.getElementById("loading").remove();
+      document.getElementById('loading').remove();
       document.body.append(canvas);
 
       let stage = new createjs.Stage(canvas);

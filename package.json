@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "just a sample game",
   "main": "app/main.js",
-  "scripts": {
-    "test": "mocha tests/*.js"
+  "scripts": {        
   },
   "keywords": [
     "game"
   ],
+
   "author": "Adrian Gesto",
   "license": "MIT",
   "devDependencies": {

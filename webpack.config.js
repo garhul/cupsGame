@@ -34,6 +34,9 @@ module.exports = {
         new ExtractTextPlugin({filename:'style/main.css', allChunks: true }),
         new CopyWebpackPlugin([
            { from: 'app/assets', to: 'assets' }
-       ])
+       ]),
+       new CopyWebpackPlugin([
+          { from: 'app/index.html', to: 'index.html' }
+      ])
     ]
 };

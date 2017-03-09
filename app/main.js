@@ -10,7 +10,7 @@ const style = require('./style/main.scss');
       canvas.setAttribute('width',cfg.canvas.width)
       canvas.setAttribute('height',cfg.canvas.height);
 
-      document.getElementById("loading").remove();
+      document.getElementById('loading').remove();
       document.body.append(canvas);
 
       let stage = new createjs.Stage(canvas);
