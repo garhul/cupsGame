@@ -27,6 +27,7 @@ module.exports = function mainScene(Game) {
         maxScoreText.x = 5;
         maxScoreText.y = 30;
 
+        //set "choose a cup" text
         chooseTxt = new createjs.Text('Choose a cup', '1.4em Arial', '#FFF');
         chooseTxt.x = Game.stage.canvas.width / 2 - chooseTxt.getMeasuredWidth();
         chooseTxt.y = 50;
@@ -34,16 +35,14 @@ module.exports = function mainScene(Game) {
 
         Game.stage.addChild(scoreText, maxScoreText, chooseTxt);
 
-        //let's draw the cups
         createjs.MotionGuidePlugin.install();
-
+        //let's draw the cups
         for (let i = 0; i < 3; i++) {
 
             cups.push(new createjs.Bitmap(Game.queue.getResult('cup')));
 
             if (ballPosition === i)
             cups[i].visible = false;
-
             cups[i].x = (Game.stage.canvas.width / 3) * i + (Game.stage.canvas.width / (3 * 2)) - 5;
             cups[i].y = 120;
 
@@ -87,11 +86,7 @@ module.exports = function mainScene(Game) {
     function startRound() {
         ball.visible = false;
         liftedCup.visible = false;
-
-        cups.forEach((c)=>{
-            c.visible = true;
-        })
-
+        cups[ballPosition].visible = true;
         goBtn.visible = false;
         //we start a new round
         var times = Math.floor(Math.random() * 3) + 3;
