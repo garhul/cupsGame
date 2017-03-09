@@ -7,7 +7,7 @@ module.exports = {
     devServer: {
         inline: true,
         contentBase: './dist',
-        port: 1984
+        port: 2500
     },
 
     context: __dirname,

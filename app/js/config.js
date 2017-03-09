@@ -8,6 +8,7 @@ module.exports = {
         "manifest":[
             {"id":"ball", "src":"ball.png"},
             {"id":"cup","src":"cup.png"},
+            {"id":"cup_lifted","src":"cup_lifted.png"},
             {"id": "bg", "src":"bg.png"}
         ]
     },

@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,22 +73,233 @@
 "use strict";
 
 
+module.exports = function mainScene(Game) {
+    var score = 0;
+    var maxScore = 0;
+    var ballPosition = Math.floor( Math.random() * 3);
+    var cups = [];
+    var ball = null;
+    var goBtn =  null;
+    var canPick = false;
+    var liftedCup = null;
+    var chooseTxt = null;
+    var scoreText = null;
+    var maxScoreText = null;
 
-function render(stage) {
-     var bg = queue.getResult('bg');
-     
+    function render() {
+        //set background
+        Game.stage.addChild(new createjs.Bitmap(Game.queue.getResult('bg')));
 
-}
+        //set score text
+        scoreText = new createjs.Text('Score: ' + maxScore, '.8em Arial', '#FFF');
+        scoreText.x = 5;
+        scoreText.y = 10;
 
+        //set max score text
+        maxScoreText = new createjs.Text('Max score: ' + maxScore, '.8em Arial', '#FFF');
+        maxScoreText.x = 5;
+        maxScoreText.y = 30;
 
+        chooseTxt = new createjs.Text('Choose a cup', '1.4em Arial', '#FFF');
+        chooseTxt.x = Game.stage.canvas.width / 2 - chooseTxt.getMeasuredWidth();
+        chooseTxt.y = 50;
+        chooseTxt.visible = false;
 
-module.exports = {
-    render:render
+        Game.stage.addChild(scoreText, maxScoreText, chooseTxt);
+
+        //let's draw the cups
+        createjs.MotionGuidePlugin.install();
+
+        for (let i = 0; i < 3; i++) {
+
+            cups.push(new createjs.Bitmap(Game.queue.getResult('cup')));
+
+            if (ballPosition === i)
+            cups[i].visible = false;
+
+            cups[i].x = (Game.stage.canvas.width / 3) * i + (Game.stage.canvas.width / (3 * 2)) - 5;
+            cups[i].y = 120;
+
+            cups[i].addEventListener('click',(ev) => {
+                if (canPick)
+                    liftCup(i);
+            });
+
+            Game.stage.addChild(cups[i]);
+        }
+
+        liftedCup = new createjs.Bitmap(Game.queue.getResult('cup_lifted'));
+        liftedCup.x = cups[ballPosition].x;
+        liftedCup.y = cups[ballPosition].y;
+        Game.stage.addChild(liftedCup);
+
+        //draw a ball
+        ball = new createjs.Bitmap(Game.queue.getResult('ball'));
+        ball.x = cups[ballPosition].x;
+        ball.y = cups[ballPosition].y + 40;
+        Game.stage.addChild(ball);
+
+        //and a go button
+        goBtn = new createjs.Text('go!', '1em Arial', '#FFF');
+        goBtn.x = (Game.stage.canvas.width / 2) - goBtn.getMeasuredWidth();
+        goBtn.y = Game.stage.canvas.height - 50;
+
+        var hitBox = new createjs.Shape();
+        hitBox.graphics.beginFill('#000').drawRect(0,0,100,100);
+        goBtn.hitArea = hitBox;
+
+        goBtn.addEventListener('click', (ev) => {
+            chooseTxt.visible = false;
+            startRound();
+        });
+
+        Game.stage.addChild(goBtn);
+
+    }
+
+    function startRound() {
+        ball.visible = false;
+        liftedCup.visible = false;
+
+        cups.forEach((c)=>{
+            c.visible = true;
+        })
+
+        goBtn.visible = false;
+        //we start a new round
+        var times = Math.floor(Math.random() * 3) + 3;
+        shuffle(times)
+    }
+
+    function shuffle(times) {
+      if (times === 0) {
+          //we already did all the moves wait for user selection
+          canPick = true;
+          chooseTxt.visible = true;
+          return false;
+      }
+
+      canPick = false;
+
+      //move the cups to a new position
+      let a = Math.floor( Math.random() * 3 );
+      let b = Math.floor( Math.random() * 3 );
+
+      while(a === b) {
+        b = Math.floor( Math.random() * 3 );
+      }
+
+      let spd = Math.floor(Math.random () * 1000) + 600;
+
+      var launched = 1; //kep track of the tween launched
+      var handler = function () {
+          if (launched === 0)
+            return shuffle(--times);
+
+          launched --;
+      }
+
+      createjs.Tween.get(cups[a])
+        .to({guide:
+            {path:[cups[a].x, cups[a].y, 100, cups[a].y + 100, cups[b].x,cups[b].y]}}, spd)
+            .call(handler);
+
+      createjs.Tween.get(cups[b])
+        .to({guide:
+          {path:[cups[b].x,cups[b].y, 100, cups[a].y - 100, cups[a].x,cups[a].y]}}, spd)
+          .call(handler);
+    }
+
+    function liftCup(index) {
+
+        liftedCup.x = cups[index].x
+        cups[index].visible = false;
+        liftedCup.visible = true;
+        ball.x = cups[ballPosition].x;
+
+        if (ballPosition === index) {
+            ball.visible = true;
+
+            score++;
+            if (score > maxScore)
+                maxScore = score;
+
+            goBtn.text = 'Play again!';
+            goBtn.visible = true;
+        } else {
+            score = 0;
+
+            setTimeout(()=> {
+                cups[index].visible = true;
+                cups[ballPosition].visible = false;
+                ball.visible = true;
+                // liftedCup.visible = false;
+                liftedCup.x = cups[ballPosition].x;
+                goBtn.text = 'Start over';
+                goBtn.visible = true;
+            }, 2500);
+        }
+
+        scoreText.text = 'Score: ' + score;
+        maxScoreText.text = 'Max score: ' + score;
+    }
+
+    return {
+        render:render
+    }
 }
 
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function menuScene(Game) {
+    function render() {
+
+        Game.stage.addChild(new createjs.Bitmap(Game.queue.getResult('bg')));
+
+        //render text items
+        Game.stage.clear();
+        Game.stage.enableMouseOver(30);
+
+        var text = new createjs.Text('Start Game', '3em Arial', '#EEE');
+        text.x = (Game.stage.canvas.width / 2) - text.getMeasuredWidth();
+        text.y = 20;
+        text.set({alpha:.6});
+
+        var hitBox = new createjs.Shape();
+        hitBox.graphics.beginFill('#000').drawRect(0, 0, text.getMeasuredWidth() * 2, 100);
+        text.hitArea = hitBox;
+        
+        text.addEventListener('mouseover', (ev) =>{
+            ev.target.set({alpha:1});
+        });
+
+        text.addEventListener('mouseout', (ev)=>{
+            ev.target.set({alpha:.6});
+        });
+
+        text.addEventListener('click', (ev) => {
+            Game.stage.removeChild(text);
+            Game.renderScene(Game.scenes.main);
+        });
+
+        Game.stage.addChild(text);
+
+    }
+
+    return {
+        render:render
+    }
+}
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -102,6 +313,7 @@ module.exports = {
         "manifest":[
             {"id":"ball", "src":"ball.png"},
             {"id":"cup","src":"cup.png"},
+            {"id":"cup_lifted","src":"cup_lifted.png"},
             {"id": "bg", "src":"bg.png"}
         ]
     },
@@ -115,125 +327,62 @@ module.exports = {
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = function GAME(Stage, Queue) {
+const Game = {
 
-    var score = 0;
-    var scenes = ['menu.js','scores.js','main.js'];
-    var balls = [];
-    var cups = [];
-    var currentScene = 0;
+    score: 0,
+    scenes:{ menu:'menu.js', score:'scores.js', main:'main.js' },
+    balls: [],
+    cups : [],
+    currentScene : 0,
+    stage:null,
+    queue:null,
 
+    init: function (Stage, Queue) {
+        this.stage = Stage;
+        this.queue = Queue;
 
-    function init () {
         createjs.Ticker.setFPS(24);
         createjs.Ticker.addEventListener('tick', (ev) => {
             Stage.update();
         });
 
-        var bg = new createjs.Bitmap(Queue.getResult("bg"));
-        console.log(bg);
-        Stage.addChild(bg);
+        this.renderScene(this.scenes.menu);
+    },
 
-        //render appropiate scene
-        _renderScene(__webpack_require__(4)("./" + scenes[currentScene]));
+    renderScene: function(scene) {
+        //clear our stage first
+        this.stage.removeAllChildren();
+        var sc = __webpack_require__(5)("./" + scene)(this)
 
+        sc.render();
     }
 
-
-    function _renderScene(scene) {
-        console.log('rendering ' + scene);
-    }
-
-    // const Game = {
-    //
-    //   init: function(stage) {
-    //       //   createjs.Ticker.framerate = 30;
-    //       //   createjs.Ticker.addEventListener('tick', (ev) => {
-    //       //     // this.stage.update();
-    //       //   });
-    //         //
-    //         //
-    //       //   var text = new createjs.Text("Hello World", "20px Arial", "#ff7700");
-    //       //   text.x = 100;
-    //       //   text.textBaseline = "alphabetic";
-    //       //   stage.addChild(bg, text);
-    //
-    //       //menu background
-    //
-    //
-    //   },
-    //
-    //   start : function() {
-    //     //let's put the ball in a random location
-    //     createjs.MotionGuidePlugin.install();
-    //     this.ballPosition = Math.floor( Math.random() * CUPS_COUNT);
-    //
-    //     for (var i = 0; i < CUPS_COUNT; i++) {
-    //       this.cups.push(new createjs.Shape());
-    //       this.cups[i].graphics.beginFill('#CCCCCC').rect(10, (stage.canvas.height / 2) + 10, 30,5);
-    //       this.cups[i].x = (stage.canvas.width / CUPS_COUNT) * i + (stage.canvas.width / (CUPS_COUNT * 2)) - 5;
-    //       stage.addChild(this.cups[i]);
-    //
-    //       //draw some balls
-    //       this.balls.push(new createjs.Shape());
-    //       this.balls[i].graphics.beginFill((i === this.ballPosition)?'#0066ff':'#ff6600')
-    //         .drawCircle((stage.canvas.width / CUPS_COUNT) * i + (stage.canvas.width / (CUPS_COUNT * 2)) + 20, stage.canvas.height / 2, 10);
-    //       stage.addChild(this.balls[i]);
-    //     }
-    //     stage.update();
-    //
-    //   },
-    //
-    //   shuffle : function() {
-    //     //move the cups to a new position
-    //     let a = Math.floor( Math.random() * CUPS_COUNT );
-    //     let b = Math.floor( Math.random() * CUPS_COUNT );
-    //     while(a == b) {
-    //       b = Math.floor( Math.random() * CUPS_COUNT );
-    //     }
-    //
-    //     let spd = Math.floor(Math.random () * 1200) + 200;
-    //
-    //     // this.cups[0].graphics.curveTo(this.cups[0].x,this.cups[0].y, this.cups[1].x,this.cups[1].y);
-    //
-    //     createjs.Tween.get(this.cups[a]).to({guide:{ path:[this.cups[a].x,this.cups[a].y, 100,100, this.cups[b].x,this.cups[b].y] }} , spd);
-    //     createjs.Tween.get(this.cups[b]).to({guide:{ path:[this.cups[b].x,this.cups[b].y, 100,-100, this.cups[a].x,this.cups[a].y] }} , spd);
-    //
-    //
-    //     //now swap the cups positions
-    //
-    //   },
-    //
-    //   liftCup : function(cup_index) {
-    //
-    //   },
-    // }
-
-    return {
-        init: init
-    }
 }
+
+module.exports = Game;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
-	"./menu": 0,
-	"./menu.js": 0
+	"./main": 0,
+	"./main.js": 0,
+	"./menu": 1,
+	"./menu.js": 1
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -249,17 +398,17 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 4;
+webpackContext.id = 5;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const cfg = __webpack_require__(1);
-const style = __webpack_require__(3);
+const cfg = __webpack_require__(2);
+const style = __webpack_require__(4);
 
 (() => {
   var queue = new createjs.LoadQueue();
@@ -274,8 +423,8 @@ const style = __webpack_require__(3);
 
       let stage = new createjs.Stage(canvas);
 
-      const game = __webpack_require__(2)(stage, queue);
-      game.init();
+      const game = __webpack_require__(3);
+      game.init(stage, queue);
   });
 
   //start preloading our assets

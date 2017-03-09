@@ -3,54 +3,175 @@
 module.exports = function mainScene(Game) {
     var score = 0;
     var maxScore = 0;
+    var ballPosition = Math.floor( Math.random() * 3);
+    var cups = [];
+    var ball = null;
+    var goBtn =  null;
+    var canPick = false;
+    var liftedCup = null;
+    var chooseTxt = null;
+    var scoreText = null;
+    var maxScoreText = null;
 
     function render() {
+        //set background
+        Game.stage.addChild(new createjs.Bitmap(Game.queue.getResult('bg')));
 
-    };
+        //set score text
+        scoreText = new createjs.Text('Score: ' + maxScore, '.8em Arial', '#FFF');
+        scoreText.x = 5;
+        scoreText.y = 10;
 
-    start : function() {
-      //let's put the ball in a random location
-      createjs.MotionGuidePlugin.install();
-      this.ballPosition = Math.floor( Math.random() * CUPS_COUNT);
+        //set max score text
+        maxScoreText = new createjs.Text('Max score: ' + maxScore, '.8em Arial', '#FFF');
+        maxScoreText.x = 5;
+        maxScoreText.y = 30;
 
-      for (var i = 0; i < CUPS_COUNT; i++) {
-        this.cups.push(new createjs.Shape());
-        this.cups[i].graphics.beginFill('#CCCCCC').rect(10, (stage.canvas.height / 2) + 10, 30,5);
-        this.cups[i].x = (stage.canvas.width / CUPS_COUNT) * i + (stage.canvas.width / (CUPS_COUNT * 2)) - 5;
-        stage.addChild(this.cups[i]);
+        chooseTxt = new createjs.Text('Choose a cup', '1.4em Arial', '#FFF');
+        chooseTxt.x = Game.stage.canvas.width / 2 - chooseTxt.getMeasuredWidth();
+        chooseTxt.y = 50;
+        chooseTxt.visible = false;
 
-        //draw some balls
-        this.balls.push(new createjs.Shape());
-        this.balls[i].graphics.beginFill((i === this.ballPosition)?'#0066ff':'#ff6600')
-          .drawCircle((stage.canvas.width / CUPS_COUNT) * i + (stage.canvas.width / (CUPS_COUNT * 2)) + 20, stage.canvas.height / 2, 10);
-        stage.addChild(this.balls[i]);
+        Game.stage.addChild(scoreText, maxScoreText, chooseTxt);
+
+        //let's draw the cups
+        createjs.MotionGuidePlugin.install();
+
+        for (let i = 0; i < 3; i++) {
+
+            cups.push(new createjs.Bitmap(Game.queue.getResult('cup')));
+
+            if (ballPosition === i)
+            cups[i].visible = false;
+
+            cups[i].x = (Game.stage.canvas.width / 3) * i + (Game.stage.canvas.width / (3 * 2)) - 5;
+            cups[i].y = 120;
+
+            cups[i].addEventListener('click',(ev) => {
+                if (canPick)
+                    liftCup(i);
+            });
+
+            Game.stage.addChild(cups[i]);
+        }
+
+        liftedCup = new createjs.Bitmap(Game.queue.getResult('cup_lifted'));
+        liftedCup.x = cups[ballPosition].x;
+        liftedCup.y = cups[ballPosition].y;
+        Game.stage.addChild(liftedCup);
+
+        //draw a ball
+        ball = new createjs.Bitmap(Game.queue.getResult('ball'));
+        ball.x = cups[ballPosition].x;
+        ball.y = cups[ballPosition].y + 40;
+        Game.stage.addChild(ball);
+
+        //and a go button
+        goBtn = new createjs.Text('go!', '1em Arial', '#FFF');
+        goBtn.x = (Game.stage.canvas.width / 2) - goBtn.getMeasuredWidth();
+        goBtn.y = Game.stage.canvas.height - 50;
+
+        var hitBox = new createjs.Shape();
+        hitBox.graphics.beginFill('#000').drawRect(0,0,100,100);
+        goBtn.hitArea = hitBox;
+
+        goBtn.addEventListener('click', (ev) => {
+            chooseTxt.visible = false;
+            startRound();
+        });
+
+        Game.stage.addChild(goBtn);
+
+    }
+
+    function startRound() {
+        ball.visible = false;
+        liftedCup.visible = false;
+
+        cups.forEach((c)=>{
+            c.visible = true;
+        })
+
+        goBtn.visible = false;
+        //we start a new round
+        var times = Math.floor(Math.random() * 3) + 3;
+        shuffle(times)
+    }
+
+    function shuffle(times) {
+      if (times === 0) {
+          //we already did all the moves wait for user selection
+          canPick = true;
+          chooseTxt.visible = true;
+          return false;
       }
-      stage.update();
 
-    },
+      canPick = false;
 
-    shuffle : function() {
       //move the cups to a new position
-      let a = Math.floor( Math.random() * CUPS_COUNT );
-      let b = Math.floor( Math.random() * CUPS_COUNT );
-      while(a == b) {
-        b = Math.floor( Math.random() * CUPS_COUNT );
+      let a = Math.floor( Math.random() * 3 );
+      let b = Math.floor( Math.random() * 3 );
+
+      while(a === b) {
+        b = Math.floor( Math.random() * 3 );
       }
 
-      let spd = Math.floor(Math.random () * 1200) + 200;
+      let spd = Math.floor(Math.random () * 1000) + 600;
 
-      // this.cups[0].graphics.curveTo(this.cups[0].x,this.cups[0].y, this.cups[1].x,this.cups[1].y);
+      var launched = 1; //kep track of the tween launched
+      var handler = function () {
+          if (launched === 0)
+            return shuffle(--times);
 
-      createjs.Tween.get(this.cups[a]).to({guide:{ path:[this.cups[a].x,this.cups[a].y, 100,100, this.cups[b].x,this.cups[b].y] }} , spd);
-      createjs.Tween.get(this.cups[b]).to({guide:{ path:[this.cups[b].x,this.cups[b].y, 100,-100, this.cups[a].x,this.cups[a].y] }} , spd);
+          launched --;
+      }
 
+      createjs.Tween.get(cups[a])
+        .to({guide:
+            {path:[cups[a].x, cups[a].y, 100, cups[a].y + 100, cups[b].x,cups[b].y]}}, spd)
+            .call(handler);
 
-      //now swap the cups positions
+      createjs.Tween.get(cups[b])
+        .to({guide:
+          {path:[cups[b].x,cups[b].y, 100, cups[a].y - 100, cups[a].x,cups[a].y]}}, spd)
+          .call(handler);
+    }
 
-    },
+    function liftCup(index) {
 
-    liftCup : function(cup_index) {
+        liftedCup.x = cups[index].x
+        cups[index].visible = false;
+        liftedCup.visible = true;
+        ball.x = cups[ballPosition].x;
 
-    },
-  }
+        if (ballPosition === index) {
+            ball.visible = true;
+
+            score++;
+            if (score > maxScore)
+                maxScore = score;
+
+            goBtn.text = 'Play again!';
+            goBtn.visible = true;
+        } else {
+            score = 0;
+
+            setTimeout(()=> {
+                cups[index].visible = true;
+                cups[ballPosition].visible = false;
+                ball.visible = true;
+                // liftedCup.visible = false;
+                liftedCup.x = cups[ballPosition].x;
+                goBtn.text = 'Start over';
+                goBtn.visible = true;
+            }, 2500);
+        }
+
+        scoreText.text = 'Score: ' + score;
+        maxScoreText.text = 'Max score: ' + score;
+    }
+
+    return {
+        render:render
+    }
 }
