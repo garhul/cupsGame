@@ -2,7 +2,7 @@
 
 const Game = {
 
-    scenes:const { menu:'menu.js', score:'scores.js', main:'main.js' },
+    scenes: { menu:'menu.js', score:'scores.js', main:'main.js' },
     stage:null,
     queue:null,
 
