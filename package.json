@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "just a sample game",
   "main": "app/main.js",
-  "scripts": {},
+  "scripts": {
+    "start": "webpack-dev-server"
+  },
   "keywords": [
     "game"
   ],
