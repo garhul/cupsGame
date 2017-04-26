@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "description": "just a sample game",
   "main": "app/main.js",
-  "scripts": {},
+  "scripts": {
+    "start": "webpack-dev-server"
+  },
   "keywords": [
     "game"
   ],
+  "engines":{
+    "node": "6"
+  },
   "author": "Adrian Gesto",
   "license": "MIT",
   "devDependencies": {
